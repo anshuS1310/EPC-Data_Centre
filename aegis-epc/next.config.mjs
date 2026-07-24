@@ -7,10 +7,11 @@ const nextConfig = {
   // network IP (e.g. 172.25.x.x/WSL) — the browser can't reach 127.0.0.1:8000
   // directly, but the Next.js server can because it runs on the same machine.
   async rewrites() {
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000';
     return [
       {
         source: "/backend/:path*",
-        destination: "${process.env.BACKEND_URL}/:path*",
+        destination: `${backendUrl}/:path*`,
       },
     ];
   },
