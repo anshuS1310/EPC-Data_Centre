@@ -53,9 +53,9 @@ app.add_middleware(
         "http://127.0.0.1:3001",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
-        # WSL / network IP access — allow any local network origin in dev
         "http://172.25.228.96:3000",
         "http://172.25.228.96:8000",
+        "https://<your-frontend-render-url>"
     ],
     allow_credentials=True,
     allow_methods=["*"],
