@@ -1,5 +1,7 @@
 # DCIMS / AegisEPC — AI Intelligence Platform for Data Centre EPC Project Delivery
 
+**Live Demo** - https://epc-data-centre-frontend.onrender.com
+
 > An end-to-end, multi-agent AI intelligence platform that unifies project specifications, schedules, procurement data, geospatial logistics, and commissioning records into a living knowledge graph — eliminating schedule overruns, automating quality compliance, and guaranteeing Uptime Tier III/IV SLA standards for hyperscale data centre construction.
 
 ---
