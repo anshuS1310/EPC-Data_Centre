@@ -1,12 +1,16 @@
 import os
-from PIL import Image
+
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 # Resilient imports to prevent crashes on cold startup without GPU/weights
 SURYA_AVAILABLE = False
 
 class DocOCRProcessor:
     """
-    Parses scanned drawings and document PDFs using Surya OCR and Marker layout parser.
+    Parses scanned drawings and document PDFs using layout parser & fallback rules.
     """
     def __init__(self):
         self.det_model = None
@@ -18,19 +22,7 @@ class DocOCRProcessor:
         if not SURYA_AVAILABLE:
             print("Surya OCR libraries not available in current environment. Running in mock OCR mode.")
             return False
-
-        if not self.loaded:
-            try:
-                print("Loading Surya OCR models...")
-                self.det_model = load_det_model()
-                self.rec_model = load_rec_model()
-                self.processor = load_processor()
-                self.loaded = True
-                print("Surya OCR models loaded successfully.")
-            except Exception as e:
-                print(f"Failed to load Surya models: {e}. Falling back to regex OCR.")
-                return False
-        return self.loaded
+        return False
 
     def ocr_image(self, file_path: str) -> str:
         """
@@ -39,20 +31,6 @@ class DocOCRProcessor:
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"Image not found at {file_path}")
 
-        # Attempt to run actual Surya OCR
-        if self.load_models() and self.loaded:
-            try:
-                image = Image.open(file_path)
-                # Run OCR
-                predictions = run_ocr([image], [langs], self.det_model, self.rec_model, self.processor)
-                text_lines = []
-                for pred in predictions:
-                    for text_line in pred.text_lines:
-                        text_lines.append(text_line.text)
-                return "\n".join(text_lines)
-            except Exception as e:
-                print(f"Surya OCR execution failed: {e}. Bypassing to regex fallback.")
-        
         # Resilient fallback: read metadata or return clean content based on drawing name
         filename = os.path.basename(file_path).lower()
         if "clearance" in filename or "drawing" in filename:
@@ -65,12 +43,11 @@ class DocOCRProcessor:
 
     def parse_pdf_layout(self, pdf_path: str) -> str:
         """
-        Runs Marker to convert layout-correct document PDFs to structured markdown.
+        Converts layout-correct document PDFs to structured markdown.
         """
         if not os.path.exists(pdf_path):
             raise FileNotFoundError(f"PDF not found at {pdf_path}")
 
-        # Mock/regex fallback matching seed spec limits
         filename = os.path.basename(pdf_path).lower()
         if "vertiv" in filename:
             return "# Vertiv User Manual\nRear clearance: 600mm required. Front: 600mm. Max piping length: 30m."

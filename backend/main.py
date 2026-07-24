@@ -1,8 +1,12 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
+import sys
 import os
 import shutil
+
+# Ensure current directory is on sys.path for submodule imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from schemas.api_models import (
     WbsTaskOut, SpecCheckIn, ValidationResultOut, OcrResultOut,
