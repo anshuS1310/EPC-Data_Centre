@@ -102,7 +102,7 @@ export default function Home() {
           <div className="mx-6 mt-3 flex items-center gap-3 bg-amber-50 border border-amber-300 rounded-xl px-4 py-2.5 shadow-sm">
             <RefreshCw className="h-4 w-4 text-amber-600 animate-spin flex-shrink-0" />
             <p className="text-sm font-semibold text-amber-800">
-              Waking up backend server… This may take up to 2 minutes on first load (free tier cold start). Please wait.
+              Connecting to DCIMS Intelligence Platform server… Loading project data.
             </p>
           </div>
         )}

@@ -3,14 +3,6 @@ from PIL import Image
 
 # Resilient imports to prevent crashes on cold startup without GPU/weights
 SURYA_AVAILABLE = False
-try:
-    from surya.ocr import run_ocr
-    from surya.model.detection.model import load_model as load_det_model
-    from surya.model.recognition.model import load_model as load_rec_model
-    from surya.model.recognition.processor import load_processor
-    SURYA_AVAILABLE = True
-except ImportError:
-    pass
 
 class DocOCRProcessor:
     """

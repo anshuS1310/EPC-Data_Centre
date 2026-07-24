@@ -194,8 +194,8 @@ export const SharedBrainProvider = ({ children }) => {
 
   useEffect(() => {
     const initStartup = async () => {
-      console.info("Waiting for backend (Render free tier may take 60-90s to wake up)...");
-      const ready = await waitForBackend(180000, 3000);
+      console.info("Connecting to backend server...");
+      const ready = await waitForBackend(180000, 2000);
       setBackendReady(true); // show UI regardless — if backend timed out, data fetches will use fallback
       if (ready) {
         console.info("Backend ready — loading project data.");
