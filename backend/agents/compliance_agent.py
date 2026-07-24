@@ -24,7 +24,8 @@ class ComplianceAgent:
 
         try:
             raw_res = self.llm.generate_vision_content(prompt, image_bytes, mime_type)
-            print(f"[Gemini Vision Raw Response]: {raw_res}")
+            # Log to server console for debugging
+            print(f"[Gemini Vision]: {raw_res[:120]}...")
             
             # Stage 1: Standard requested format check
             match = re.search(r"CLEARANCE\s*=\s*(\d+)", raw_res, re.IGNORECASE)
@@ -46,15 +47,23 @@ class ComplianceAgent:
                 return self.evaluate_safety_gate(500, spec_id)
             if "600" in raw_res:
                 return self.evaluate_safety_gate(600, spec_id)
-            
+
+            # No clearance found — return clean Gemini description so user understands why
+            clean = raw_res.strip()
+            for prefix in ["[Gemini Vision Raw Response]:", "Raw Response:", "Vision Response:", "CHATBOT:"]:
+                if clean.startswith(prefix):
+                    clean = clean[len(prefix):].strip()
+            # Limit to 400 chars for readability
+            display = clean[:400] + ("…" if len(clean) > 400 else "")
             return {
                 "success": False,
                 "status": "PENDING_REVIEW",
-                "log": "Document processed. No numeric clearance dimension was detected automatically — please enter the value manually.",
+                "log": f"No numeric clearance dimension found — {display}",
                 "value": None
             }
         except Exception as e:
-            return {"success": False, "status": "ERROR", "log": f"Could not process document. Please try again or enter values manually.", "value": None}
+            return {"success": False, "status": "ERROR", "log": "Could not process document. Please try again or enter values manually.", "value": None}
+
 
     def evaluate_safety_gate(self, extracted_val: int, spec_id: str) -> dict:
         """
