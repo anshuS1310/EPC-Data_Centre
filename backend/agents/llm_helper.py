@@ -23,7 +23,7 @@ class GeminiLLMHelper:
     def __init__(self):
         self.client = _client
         # API models configured for user's Gemini key
-        self.models = ["gemini-3.5-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite"]
+        self.models = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.5-flash-lite"]
 
     def generate_content(self, prompt: str) -> str:
         """
