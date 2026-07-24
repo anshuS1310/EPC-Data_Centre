@@ -1,0 +1,39 @@
+### === Environment variables (NEVER commit secrets) === ###
+.env
+.env.local
+backend/.env
+aegis-epc/.env
+!.env.example
+
+### === Python / Backend === ###
+epcv/
+venv/
+env/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Runtime databases — regenerated via db/seed_data.py, never commit
+backend/chroma_db_data/
+backend/kuzu_db_data
+backend/kuzu_db_data.wal
+backend/temp_uploads/
+
+### === Node.js / Next.js frontend === ###
+aegis-epc/node_modules/
+aegis-epc/.next/
+aegis-epc/out/
+npm-debug.log*
+
+### === OS / Editor junk === ###
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+### === Misc === ###
+*.tmp
+*.bak

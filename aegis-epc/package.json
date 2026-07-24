@@ -1,0 +1,36 @@
+{
+  "name": "aegis-epc",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "frappe-gantt": "^1.2.2",
+    "gantt-task-react": "^0.3.9",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.475.0",
+    "maplibre-gl": "^5.24.0",
+    "next": "^16.2.11",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "recharts": "^2.15.4",
+    "tailwind-merge": "^3.6.0",
+    "tesseract.js": "^6.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^15.1.7",
+    "tailwindcss": "^4.0.0"
+  },
+  "allowScripts": {
+    "sharp@0.34.5": true,
+    "tesseract.js@6.0.1": true,
+    "unrs-resolver@1.12.2": true
+  }
+}
