@@ -23,9 +23,11 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, onToggle }) {
           {isOpen ? (
             <>
               <img src="/emblem-india.png" alt="Government of India" className="h-10 w-auto object-contain select-none flex-shrink-0" draggable={false} />
-              <div className="overflow-hidden flex-1 min-w-0">
+              <div className="overflow-hidden flex-1 min-w-0 pr-1">
                 <span className="font-bold text-slate-900 text-base block leading-tight whitespace-nowrap">DCIMS</span>
-                <span className="text-xs text-slate-600 font-semibold leading-tight block whitespace-nowrap">Infrastructure Management</span>
+                <span className="text-[11px] text-slate-600 font-semibold leading-tight block truncate" title="Data Centre Infrastructure Management System">
+                  Infrastructure Management System
+                </span>
               </div>
               {/* Toggle — inside header when expanded */}
               <button

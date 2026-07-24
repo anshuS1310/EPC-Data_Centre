@@ -1,5 +1,27 @@
 from db.graph_db import get_db_connection, db_lock
 
+STANDARD_ITEMS = {
+    "L1-01": {"description": "Verify Generator set outline drawing matches model submittal (A029E093/A029U550).", "default_status": "PASS", "default_val": "A029U550"},
+    "L1-02": {"description": "Test Generator output at 100% continuous electrical load (1000 kW continuous output).", "default_status": "PASS", "default_val": "1000 kWe"},
+    "L1-03": {"description": "Check NOx emissions dry value does not exceed standard 0.5 g/hp-h.", "default_status": "PASS", "default_val": "0.48 g/hp-h"},
+    "L1-04": {"description": "Verify Vertiv CRV+ compressor model uses approved DC Brushless scroll compressor.", "default_status": "PASS", "default_val": "R-410A Brushless"},
+    "L2-01": {"description": "Check Vertiv CRV+ nameplate matches requested cooling capacity (e.g., 38.1 kW for CR035).", "default_status": "PASS", "default_val": "38.1 kW"},
+    "L2-02": {"description": "Verify physical space clearance around Vertiv CRV+ complies with minimum 600mm front and rear limits.", "default_status": "PENDING", "default_val": ""},
+    "L2-03": {"description": "Inspect Generator battery capacity matches minimum requirement (720 AH at 40°C).", "default_status": "PASS", "default_val": "720 AH"},
+    "L2-04": {"description": "Verify UPS batteries are stored in a ventilated, temperature-regulated space to prevent VRLA degradation.", "default_status": "PASS", "default_val": "22°C Room"},
+    "L3-01": {"description": "Start Vertiv CRV+ indoor fan and verify airflow speed modulation works up to 100% capacity.", "default_status": "PASS", "default_val": "5540 m3/h"},
+    "L3-02": {"description": "Test Generator gas supply pressure at engine inlet matches standard 0.2 bar (2.9 psi).", "default_status": "PASS", "default_val": "0.22 bar"},
+    "L3-03": {"description": "Verify cooling circuit HT water outlet temperature remains within standard 90°C.", "default_status": "PASS", "default_val": "89.5°C"},
+    "L3-04": {"description": "Verify cooling circuit LT water inlet temperature matches standard 40°C.", "default_status": "PASS", "default_val": "40.2°C"},
+    "L4-01": {"description": "Simulate utility grid power loss and verify Generator starts and picks up 100% load within 10 seconds.", "default_status": "PENDING", "default_val": ""},
+    "L4-02": {"description": "Test Liebert CROSS Static Transfer Switch (STS) failover time between dual feeds under load (must be < 6ms).", "default_status": "PENDING", "default_val": ""},
+    "L4-03": {"description": "Measure rack return air temperatures at hot aisle to ensure rear rPDUs do not exceed maximum 60°C rating.", "default_status": "PENDING", "default_val": ""},
+    "L4-04": {"description": "Verify continuous cooling loop operates during complete power system swap without temperature spike.", "default_status": "PENDING", "default_val": ""},
+    "L5-01": {"description": "Assemble all Level 1-4 completed test records into the final as-commissioned Tier certification binder.", "default_status": "PENDING", "default_val": ""},
+    "L5-02": {"description": "Verify DPDP compliance consent manager auditing is fully activated in the data center database infrastructure.", "default_status": "PENDING", "default_val": ""},
+    "L5-03": {"description": "Baseline final engineering parameters to the DCIM system for long-term SLA monitoring.", "default_status": "PENDING", "default_val": ""}
+}
+
 class CommissioningAgent:
     """
     Agent 4: Commissioning & Quality Assurance Copilot.
@@ -30,44 +52,20 @@ class CommissioningAgent:
             db_items[cid] = {"id": cid, "description": desc, "status": status, "verified_value": val}
 
         # Compile standard checklists with live KuzuDB states
-        # Level 1
-        levels["Level 1"]["checklist"] = [
-            db_items.get("L1-01", {"id": "L1-01", "description": "Verify Generator set outline drawing matches model submittal (A029E093/A029U550).", "status": "PASS", "verified_value": "A029U550"}),
-            db_items.get("L1-02", {"id": "L1-02", "description": "Test Generator output at 100% continuous electrical load (1000 kW continuous output).", "status": "PASS", "verified_value": "1000 kWe"}),
-            db_items.get("L1-03", {"id": "L1-03", "description": "Check NOx emissions dry value does not exceed standard 0.5 g/hp-h.", "status": "PASS", "verified_value": "0.48 g/hp-h"}),
-            db_items.get("L1-04", {"id": "L1-04", "description": "Verify Vertiv CRV+ compressor model uses approved DC Brushless scroll compressor.", "status": "PASS", "verified_value": "R-410A Brushless"})
-        ]
-        
-        # Level 2
-        levels["Level 2"]["checklist"] = [
-            db_items.get("L2-01", {"id": "L2-01", "description": "Check Vertiv CRV+ nameplate matches requested cooling capacity (e.g., 38.1 kW for CR035).", "status": "PASS", "verified_value": "38.1 kW"}),
-            db_items.get("L2-02", {"id": "L2-02", "description": "Verify physical space clearance around Vertiv CRV+ complies with minimum 600mm front and rear limits.", "status": "PENDING", "verified_value": None}),
-            db_items.get("L2-03", {"id": "L2-03", "description": "Inspect Generator battery capacity matches minimum requirement (720 AH at 40°C).", "status": "PASS", "verified_value": "720 AH"}),
-            db_items.get("L2-04", {"id": "L2-04", "description": "Verify UPS batteries are stored in a ventilated, temperature-regulated space to prevent VRLA degradation.", "status": "PASS", "verified_value": "22°C Room"})
-        ]
-        
-        # Level 3
-        levels["Level 3"]["checklist"] = [
-            db_items.get("L3-01", {"id": "L3-01", "description": "Start Vertiv CRV+ indoor fan and verify airflow speed modulation works up to 100% capacity.", "status": "PASS", "verified_value": "5540 m3/h"}),
-            db_items.get("L3-02", {"id": "L3-02", "description": "Test Generator gas supply pressure at engine inlet matches standard 0.2 bar (2.9 psi).", "status": "PASS", "verified_value": "0.22 bar"}),
-            db_items.get("L3-03", {"id": "L3-03", "description": "Verify cooling circuit HT water outlet temperature remains within standard 90°C.", "status": "PASS", "verified_value": "89.5°C"}),
-            db_items.get("L3-04", {"id": "L3-04", "description": "Verify cooling circuit LT water inlet temperature matches standard 40°C.", "status": "PASS", "verified_value": "40.2°C"})
-        ]
-
-        # Level 4
-        levels["Level 4"]["checklist"] = [
-            db_items.get("L4-01", {"id": "L4-01", "description": "Simulate utility grid power loss and verify Generator starts and picks up 100% load within 10 seconds.", "status": "PENDING", "verified_value": None}),
-            db_items.get("L4-02", {"id": "L4-02", "description": "Test Liebert CROSS Static Transfer Switch (STS) failover time between dual feeds under load (must be < 6ms).", "status": "PENDING", "verified_value": None}),
-            db_items.get("L4-03", {"id": "L4-03", "description": "Measure rack return air temperatures at hot aisle to ensure rear rPDUs do not exceed maximum 60°C rating.", "status": "PENDING", "verified_value": None}),
-            db_items.get("L4-04", {"id": "L4-04", "description": "Verify continuous cooling loop operates during complete power system swap without temperature spike.", "status": "PENDING", "verified_value": None})
-        ]
-
-        # Level 5
-        levels["Level 5"]["checklist"] = [
-            db_items.get("L5-01", {"id": "L5-01", "description": "Assemble all Level 1-4 completed test records into the final as-commissioned Tier certification binder.", "status": "PENDING", "verified_value": None}),
-            db_items.get("L5-02", {"id": "L5-02", "description": "Verify DPDP compliance consent manager auditing is fully activated in the data center database infrastructure.", "status": "PENDING", "verified_value": None}),
-            db_items.get("L5-03", {"id": "L5-03", "description": "Baseline final engineering parameters to the DCIM system for long-term SLA monitoring.", "status": "PENDING", "verified_value": None})
-        ]
+        for item_id, std_info in STANDARD_ITEMS.items():
+            db_item = db_items.get(item_id, {})
+            status = db_item.get("status") or std_info["default_status"]
+            desc = db_item.get("description") if (db_item.get("description") and db_item.get("description").strip()) else std_info["description"]
+            val = db_item.get("verified_value") if (db_item.get("verified_value") is not None and db_item.get("verified_value") != "") else (std_info["default_val"] if status == "PASS" else None)
+            
+            lvl_key = f"Level {item_id[1]}"
+            if lvl_key in levels:
+                levels[lvl_key]["checklist"].append({
+                    "id": item_id,
+                    "description": desc,
+                    "status": status,
+                    "verified_value": val
+                })
 
         return list(levels.values())
 
@@ -95,7 +93,7 @@ class CommissioningAgent:
                     "error_msg": "BLOCKED: Cannot pass Level 2 Clearance checks while the Vertiv CRV+ Clearance NCR is OPEN."
                 }
 
-        # 3. Thermal constraint check: Piping NCR blocks Level 4 hot aisle return air temperature checks
+        # 3. Piping constraint check: Piping NCR blocks Level 4 Return Air check
         if level == "Level 4" and item_id == "L4-03":
             ncr_chk = conn.execute("MATCH (n:NonConformance {spec_clause: 'Vertiv-CRV+-PipingLimit', status: 'OPEN'}) RETURN n.id")
             if ncr_chk.has_next():
@@ -104,22 +102,25 @@ class CommissioningAgent:
                     "error_msg": "BLOCKED: Cannot pass Level 4 Return Air checks while the Vertiv Piping Limit NCR is OPEN."
                 }
 
-        # 2. Get current status to toggle
+        # Determine current state and target status cleanly
+        std_item = STANDARD_ITEMS.get(item_id, {"description": "Commissioning check", "default_status": "PENDING", "default_val": ""})
+        
         res = conn.execute(f"MATCH (c:CxProcedure {{id: '{item_id}'}}) RETURN c.status")
-        curr_status = "PENDING"
         if res.has_next():
             curr_status = res.get_next()[0]
+        else:
+            curr_status = std_item["default_status"]
 
         new_status = "PASS" if curr_status == "PENDING" else "PENDING"
-        new_val = "VERIFIED" if new_status == "PASS" else ""
+        new_val = std_item["default_val"] if new_status == "PASS" else ""
+        item_desc = std_item["description"].replace("'", "''")
 
         with db_lock:
             chk_exist = conn.execute(f"MATCH (c:CxProcedure {{id: '{item_id}'}}) RETURN c.id")
             if not chk_exist.has_next():
-                # If not seeded in KuzuDB node yet, create it
-                conn.execute(f"CREATE (c:CxProcedure {{id: '{item_id}', description: '', status: '{new_status}', verified_val: '{new_val}', level: '{level}'}});")
+                conn.execute(f"CREATE (c:CxProcedure {{id: '{item_id}', description: '{item_desc}', status: '{new_status}', verified_val: '{new_val}', level: '{level}'}});")
             else:
-                conn.execute(f"MATCH (c:CxProcedure {{id: '{item_id}'}}) SET c.status = '{new_status}', c.verified_val = '{new_val}';")
+                conn.execute(f"MATCH (c:CxProcedure {{id: '{item_id}'}}) SET c.status = '{new_status}', c.verified_val = '{new_val}', c.description = '{item_desc}';")
 
         return {
             "success": True,
@@ -134,8 +135,6 @@ class CommissioningAgent:
         """
         conn = get_db_connection()
         
-        # Check if any Level 4 items are still PENDING
-        # (For demo compilation, we mock completion checks)
         open_ncr_chk = conn.execute("MATCH (n:NonConformance {status: 'OPEN'}) RETURN count(*)")
         ncr_count = open_ncr_chk.get_next()[0] if open_ncr_chk.has_next() else 0
 

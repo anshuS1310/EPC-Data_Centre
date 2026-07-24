@@ -17,15 +17,15 @@ function TrendArrow({ direction, upIsGood }) {
 
 function KpiChip({ icon: Icon, iconBg, iconColor, label, value, valueColor = "text-slate-900", trend }) {
   return (
-    <div className="bg-white border border-slate-300 rounded-xl px-3 py-2.5 flex items-center gap-2.5 shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0">
-      <div className={`w-8 h-8 rounded-lg ${iconBg} flex items-center justify-center flex-shrink-0`}>
-        <Icon className={`h-4 w-4 ${iconColor}`} />
+    <div className="bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 flex items-center gap-2 shadow-sm hover:shadow-md transition-all duration-200 flex-1 min-w-0">
+      <div className={`w-7 h-7 rounded-lg ${iconBg} flex items-center justify-center flex-shrink-0`}>
+        <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
       </div>
-      <div className="min-w-0">
-        <div className="text-[10px] font-bold text-slate-600 uppercase tracking-wider leading-none mb-0.5 whitespace-nowrap">
+      <div className="min-w-0 flex-1">
+        <div className="text-[10px] font-bold text-slate-600 uppercase tracking-wider leading-none mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
           {label}
         </div>
-        <div className={`text-sm font-bold ${valueColor} flex items-center whitespace-nowrap`}>
+        <div className={`text-xs sm:text-sm font-bold ${valueColor} flex items-center whitespace-nowrap`}>
           {value}{trend}
         </div>
       </div>
@@ -129,7 +129,7 @@ export default function Header() {
         <div className="h-8 w-px bg-slate-300 flex-shrink-0" />
 
         {/* KPI chips */}
-        <div className="flex items-center gap-2 overflow-x-auto flex-1 scrollbar-hide pb-0.5">
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
           {kpis.map((kpi) => (
             <KpiChip key={kpi.label} {...kpi} />
           ))}
