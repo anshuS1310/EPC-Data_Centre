@@ -20,7 +20,7 @@ const nextConfig = {
   // The E: network drive adds significant latency; default 30s is too short
   // for long-running backend operations like schedule update-impact.
   experimental: {
-    proxyTimeout: 120000, // 120 seconds
+    proxyTimeout: 300000, // 300 seconds — handles Render free-tier cold start
   },
 };
 

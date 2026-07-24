@@ -135,13 +135,16 @@ export const SharedBrainProvider = ({ children }) => {
   };
 
   // ─── Health check: wait for backend to be ready ──────────────────────────
-  const waitForBackend = async (maxWaitMs = 60000, intervalMs = 2000) => {
+  // Polls the lightweight /api/health endpoint (no DB access, instant response)
+  // instead of the heavy /api/orchestrator/alerts. Timeout is 180s to handle
+  // Render free-tier cold starts which can take 60-90s to spin up.
+  const waitForBackend = async (maxWaitMs = 180000, intervalMs = 3000) => {
     const start = Date.now();
     while (Date.now() - start < maxWaitMs) {
       try {
-        // 10s per-poll timeout: network drive can add >1s latency, 1s was too short
-        const res = await fetch(`${API_BASE}/orchestrator/alerts`, {
-          signal: AbortSignal.timeout(10000),
+        // 20s per-poll timeout — Render free tier is slow on first wake
+        const res = await fetch(`${API_BASE}/health`, {
+          signal: AbortSignal.timeout(20000),
         });
         if (res.ok) {
           console.info(`Backend ready after ${((Date.now() - start) / 1000).toFixed(1)}s`);
@@ -191,16 +194,20 @@ export const SharedBrainProvider = ({ children }) => {
 
   useEffect(() => {
     const initStartup = async () => {
-      console.info("Waiting for backend...");
-      await waitForBackend(90000, 1500);
-      setBackendReady(true);
-      console.info("Backend ready — loading project data.");
-      try {
-        await fetch(`${API_BASE}/orchestrator/clear`, { method: "POST" });
-      } catch (err) {
-        console.warn("Startup clear skipped:", err);
+      console.info("Waiting for backend (Render free tier may take 60-90s to wake up)...");
+      const ready = await waitForBackend(180000, 3000);
+      setBackendReady(true); // show UI regardless — if backend timed out, data fetches will use fallback
+      if (ready) {
+        console.info("Backend ready — loading project data.");
+        try {
+          await fetch(`${API_BASE}/orchestrator/clear`, { method: "POST" });
+        } catch (err) {
+          console.warn("Startup clear skipped:", err);
+        }
+        await refreshAllStates();
+      } else {
+        console.warn("Backend did not respond in time — running in offline mode with default data.");
       }
-      await refreshAllStates();
     };
     initStartup();
     // eslint-disable-next-line react-hooks/exhaustive-deps

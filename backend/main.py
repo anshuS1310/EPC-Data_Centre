@@ -43,13 +43,13 @@ async def lifespan(app: FastAPI):
 # FastAPI Startup Initialization
 app = FastAPI(title="AegisEPC Multi-Agent Backend", version="1.0", lifespan=lifespan)
 
-# Enable CORS for Next.js Frontend
+# Enable CORS — allow all origins since the Next.js frontend proxies all
+# API calls server-side (browser never hits the backend directly).
+FRONTEND_ORIGIN = os.environ.get("FRONTEND_URL", "*")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://<your-frontend-render-url>"
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -61,6 +61,17 @@ supply_chain_agent = SupplyChainAgent()
 commissioning_agent = CommissioningAgent()
 rfi_agent = RFIAgent()
 compliance_agent = ComplianceAgent()
+
+# ----------------- 0. Health Check -----------------
+@app.get("/health")
+def health_check():
+    """Lightweight liveness probe — no DB access, instant response."""
+    return {"status": "ok", "service": "AegisEPC Backend"}
+
+@app.get("/api/health")
+def api_health_check():
+    """Alias under /api prefix for Next.js proxy health polling."""
+    return {"status": "ok", "service": "AegisEPC Backend"}
 
 # ----------------- 1. Schedule & WBS Endpoints -----------------
 @app.get("/api/schedule/wbs", response_model=List[WbsTaskOut])
