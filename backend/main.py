@@ -47,14 +47,6 @@ app = FastAPI(title="AegisEPC Multi-Agent Backend", version="1.0", lifespan=life
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3001",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-        "http://172.25.228.96:3000",
-        "http://172.25.228.96:8000",
         "https://<your-frontend-render-url>"
     ],
     allow_credentials=True,
