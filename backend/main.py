@@ -4,6 +4,8 @@ from typing import List, Optional
 import sys
 import os
 import shutil
+import asyncio
+
 
 # Ensure current directory is on sys.path for submodule imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
