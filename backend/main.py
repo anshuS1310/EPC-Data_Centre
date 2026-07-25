@@ -41,16 +41,16 @@ async def _seed_in_background():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-print("Cold startup detected. Seeding database states...")
-asyncio.create_task(_seed_in_background())
-print("Database seeding completed.")
-try:
-yield
-finally:
-# Graceful shutdown — release KuzuDB file lock so next startup is clean
-from db.graph_db import close_db_connection
-close_db_connection()
-print("Backend shutdown complete.")
+    print("Cold startup detected. Seeding database states...")
+    asyncio.create_task(_seed_in_background())
+    print("Database seeding completed.")
+    try:
+        yield
+    finally:
+        # Graceful shutdown — release KuzuDB file lock so next startup is clean
+        from db.graph_db import close_db_connection
+        close_db_connection()
+        print("Backend shutdown complete.")
 
 # FastAPI Startup Initialization
 app = FastAPI(title="AegisEPC Multi-Agent Backend", version="1.0", lifespan=lifespan)
