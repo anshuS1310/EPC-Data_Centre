@@ -228,50 +228,32 @@ def upload_submittal_document(
     spec_id: str = Form("SPEC-VERTIV-CRV")
 ):
     """
-    Branching upload handler: Image uploads run Gemini Vision checks; PDFs run Surya OCR.
-    Heavy OCR deps are imported lazily right here, not at module load time.
+    Multi-Modal OCR & Specification Extractor:
+    - Text-based PDF: Fast & free text extraction via PyPDF.
+    - Images & Scanned PDFs: Vision analysis via Gemini (rendering page pixmap via PyMuPDF for scanned PDFs).
+    - Rate-Limit Guard: MD5 Hash Caching to optimize Gemini Free Tier API usage.
+    - Lazy Import: Heavy OCR/PDF libraries are imported inside the endpoint to keep cold startup fast.
     """
-    temp_dir = "temp_uploads"
-    os.makedirs(temp_dir, exist_ok=True)
+    file_bytes = file.file.read()
+    from parser.doc_ocr import DocOCRProcessor
+    processor = DocOCRProcessor()
+    
+    res = processor.process_document(
+        file_bytes=file_bytes,
+        filename=file.filename,
+        spec_id=spec_id,
+        llm_helper=compliance_agent.llm
+    )
 
-    file_path = os.path.join(temp_dir, file.filename)
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    return OcrResultOut(
+        extracted_clearance_mm=res.get("extracted_clearance_mm"),
+        extracted_piping_length_m=res.get("extracted_piping_length_m"),
+        extracted_model=res.get("extracted_model"),
+        extracted_rating=res.get("extracted_rating"),
+        success=res.get("success", True),
+        log=res.get("log", "Document processed successfully.")
+    )
 
-    try:
-        ext = os.path.splitext(file.filename)[1].lower()
-        if ext in [".png", ".jpg", ".jpeg"]:
-            with open(file_path, "rb") as f:
-                image_bytes = f.read()
-            mime_type = "image/png" if ext == ".png" else "image/jpeg"
-
-            vision_res = compliance_agent.inspect_layout_drawing(image_bytes, mime_type, spec_id)
-
-            return OcrResultOut(
-                extracted_clearance_mm=vision_res["value"],
-                success=vision_res["success"],
-                log=vision_res["log"]
-            )
-        else:
-            # Lazy import: only pulled in when a PDF actually needs OCR.
-            from parser.doc_ocr import DocOCRProcessor
-            processor = DocOCRProcessor()
-            ocr_text = processor.ocr_image(file_path)
-
-            clearance = None
-            if "500mm" in ocr_text:
-                clearance = 500
-            elif "620mm" in ocr_text:
-                clearance = 620
-
-            return OcrResultOut(
-                extracted_clearance_mm=clearance,
-                success=True,
-                log=f"PDF parsed via Surya OCR. Text extracted: '{ocr_text[:80]}...'"
-            )
-    finally:
-        if os.path.exists(file_path):
-            os.remove(file_path)
 
 
 @app.get("/api/compliance/export-ncr", response_model=List[NcrLogOut], dependencies=[Depends(require_ready)])

@@ -1,11 +1,16 @@
 import os
 
+try:
+    import chromadb
+    CHROMADB_AVAILABLE = True
+except ImportError:
+    CHROMADB_AVAILABLE = False
+
+
 class LightweightVectorCollection:
     """
-    Zero-dependency, high-speed in-memory vector collection for RAG knowledge search.
-    Uses word overlap & domain tag scoring over data centre specification manuals.
-    Consumes < 1MB RAM and initializes instantly (< 0.001s).
-    Prevents RAM limit exceed errors on Render (512MB limit).
+    Zero-dependency in-memory vector collection fallback for RAG knowledge search.
+    Used only if chromadb is unavailable.
     """
     def __init__(self, name="aegis_spec_knowledge"):
         self.name = name
@@ -35,20 +40,16 @@ class LightweightVectorCollection:
             tag = meta.get("tag", "").lower()
 
             score = 0
-            # Domain tag match bonus
             if tag and tag in query:
                 score += 10
 
-            # Word overlap match
             for word in query_words:
                 if len(word) > 2 and word in doc_lower:
                     score += 2
 
             scores.append((score, idx))
 
-        # Sort descending by score
         scores.sort(key=lambda x: x[0], reverse=True)
-
         top_indices = [idx for _, idx in scores[:n_results]]
 
         res_docs = [self.documents[i] for i in top_indices]
@@ -67,15 +68,34 @@ _collection = None
 def get_vector_db():
     global _collection
     if _collection is None:
-        _collection = LightweightVectorCollection()
-        seed_vector_knowledge(_collection)
+        if CHROMADB_AVAILABLE:
+            try:
+                db_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "chroma_db_data")
+                os.makedirs(db_dir, exist_ok=True)
+                client = chromadb.PersistentClient(path=db_dir)
+                _collection = client.get_or_create_collection(
+                    name="aegis_spec_knowledge",
+                    metadata={"hnsw:space": "cosine"}
+                )
+                seed_vector_knowledge(_collection)
+                print("ChromaDB vector store initialized successfully.")
+            except Exception as e:
+                print(f"ChromaDB initialization error: {e}. Falling back to LightweightVectorCollection.")
+                _collection = LightweightVectorCollection()
+                seed_vector_knowledge(_collection)
+        else:
+            print("ChromaDB not installed. Using LightweightVectorCollection.")
+            _collection = LightweightVectorCollection()
+            seed_vector_knowledge(_collection)
+
     return _collection
+
 
 def seed_vector_knowledge(collection):
     if collection.count() > 0:
         return
 
-    print("Seeding Lightweight Spec Vector Database...")
+    print("Seeding Spec Vector Database...")
 
     documents = [
         # 1. Vertiv Clearances
@@ -134,4 +154,4 @@ def seed_vector_knowledge(collection):
         ids=ids,
         metadatas=metadatas
     )
-    print("Lightweight Spec Vector Database Seeded successfully!")
+    print("Spec Vector Database Seeded successfully!")

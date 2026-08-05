@@ -1,0 +1,24 @@
+services:
+  # 1. Backend FastAPI Service
+  - type: web
+    name: epc-backend
+    runtime: python
+    region: singapore
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: GEMINI_API_KEY
+        sync: false
+
+  # 2. Frontend Next.js Web Service
+  - type: web
+    name: epc-frontend
+    runtime: node
+    region: singapore
+    buildCommand: cd aegis-epc && npm install && npm run build
+    startCommand: cd aegis-epc && npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.0

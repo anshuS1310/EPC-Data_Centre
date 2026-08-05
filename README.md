@@ -199,7 +199,7 @@ python -m venv epcv
 # source epcv/bin/activate
 
 # Install dependencies
-pip install fastapi uvicorn kuzu chromadb google-genai python-dotenv pydantic requests
+pip install -r requirements.txt
 
 # Create .env file for Gemini API Key
 echo "GEMINI_API_KEY=your_gemini_api_key_here" > .env
@@ -208,7 +208,7 @@ echo "GEMINI_API_KEY=your_gemini_api_key_here" > .env
 python main.py
 ```
 
-*The backend server will start at `http://127.0.0.1:8000` and automatically seed KuzuDB with default WBS tasks and equipment schemas.*
+*The backend server will start at `http://127.0.0.1:8000` and automatically seed KuzuDB and ChromaDB with default WBS tasks and equipment schemas.*
 
 ---
 
@@ -227,6 +227,20 @@ npm run dev
 ```
 
 *Open [http://localhost:3000](http://localhost:3000) in your browser to launch the DCIMS platform.*
+
+---
+
+### Step 4: Render One-Click Deployment
+
+This repository includes a native `render.yaml` configuration file for automatic deployment to **Render**:
+
+1. Connect your GitHub repository to [Render](https://render.com).
+2. Create a new **Blueprint** service pointing to this repository.
+3. Render automatically provisions:
+   - **Backend Web Service**: FastAPI server (`python main.py` / `uvicorn main:app`).
+   - **Frontend Web Service**: Next.js Web Dashboard.
+4. Set `GEMINI_API_KEY` under Environment Variables in Render Dashboard.
+
 
 ---
 
